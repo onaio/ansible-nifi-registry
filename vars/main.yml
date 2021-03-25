@@ -1,0 +1,7 @@
+---
+nifi_registry_database_dir_name: "database"
+nifi_registry_database_dir: "{{ nifi_registry_home }}/{{ nifi_registry_database_dir_name }}"
+nifi_registry_flow_storage_dir_name: "flow_storage"
+nifi_registry_flow_storage_dir: "{{ nifi_registry_home }}/{{ nifi_registry_flow_storage_dir_name }}"
+nifi_registry_host_database_volume_dir: "{{ nifi_registry_host_volumes_dir }}/{{ nifi_registry_database_dir_name }}"
+nifi_registry_host_flow_storage_volume_dir: "{{ nifi_registry_host_volumes_dir }}/{{ nifi_registry_flow_storage_dir_name }}"

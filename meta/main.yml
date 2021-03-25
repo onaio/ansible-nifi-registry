@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: Ona Engineering
+  description: Installs NiFi Registry
+  company: Ona Systems Inc.
+  license: Apache 2
+  min_ansible_version: 2.2
+  platforms:
+    - name: Ubuntu
+      verions:
+      - xenial
+  categories:
+  - database
+  - etl
+  - nifi
+
+dependencies:
+  - role: onaio.backup
+    backup_profiles: "{{ nifi_registry_backup_profiles }}"
+    backup_target_user: "{{ nifi_registry_backup_target_user }}"
+    backup_target_pass: "{{ nifi_registry_backup_target_pass }}"
+    when: nifi_registry_enable_backups

@@ -1,0 +1,38 @@
+nifi_registry_version: 0.3.0
+nifi_registry_port: 18080
+nifi_registry_home: "/opt/nifi-registry/nifi-registry-{{ nifi_registry_version }}"
+nifi_registry_host_volumes_dir: "/opt/docker/nifi-registry"
+nifi_registry_uid: 1000
+nifi_registry_gid: 1000
+nifi_registry_recreate_container: false
+
+# backups
+nifi_registry_enable_backups: true
+nifi_registry_backup_schedule: "0 1 * * *"
+nifi_registry_backup_user: "root" # The user on the host responsible for backing up NiFi Registry
+nifi_registry_backup_target: ""
+nifi_registry_backup_target_user: "" # The user to authenticate as on the backup target
+nifi_registry_backup_target_pass: ""
+nifi_registry_opsgenie_api_key:
+nifi_registry_opsgenie_host_id: "{{ ansible_host | default(inventory_hostname) }}"
+nifi_registry_backup_on_error_command: |
+  curl -X POST https://api.opsgenie.com/v2/alerts \
+      -H "Content-Type: application/json" \
+      -H "Authorization: GenieKey {{ nifi_registry_opsgenie_api_key }}" \
+      -d \
+  '{
+      "message": "NiFi Registry backups in {{ nifi_registry_opsgenie_host_id }} failing",
+      "alias": "backups-{{ nifi_registry_opsgenie_host_id | hash('sha1') }}-nifi-registry",
+      "description":"NiFi Registry backups in {{ nifi_registry_opsgenie_host_id }} are currently not running.",
+      "priority":"P2"
+  }'
+nifi_registry_backup_profiles:
+  - name: nifi-registry
+    schedule: "{{ nifi_registry_backup_schedule }}"
+    source: "{{ nifi_registry_host_volumes_dir }}"
+    target: "{{ nifi_registry_backup_target }}"
+    user: "{{ nifi_registry_backup_user }}"
+    post_actions:
+      - type: "command"
+        on_error:
+          command: "{{ nifi_registry_backup_on_error_command }}"

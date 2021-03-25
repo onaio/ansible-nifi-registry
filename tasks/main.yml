@@ -1,0 +1,34 @@
+---
+- name: Install docker python requirements
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - setuptools
+    - pip
+
+- name: Make sure the volume directories exist on the host
+  file:
+    path: "{{ item }}"
+    owner: "{{ nifi_registry_uid }}"
+    group: "{{ nifi_registry_gid }}"
+    state: directory
+    mode: 0750
+  with_items:
+    - "{{ nifi_registry_host_database_volume_dir }}"
+    - "{{ nifi_registry_host_flow_storage_volume_dir }}"
+
+- name: Restart NiFi registry container
+  docker_container:
+    name: nifi-registry
+    image: apache/nifi-registry:{{ nifi_registry_version }}
+    recreate: "{{ nifi_registry_recreate_container }}"
+    state: started
+    keep_volumes: true
+    volumes:
+      - "{{ nifi_registry_host_database_volume_dir }}:{{ nifi_registry_database_dir }}:rw"
+      - "{{ nifi_registry_host_flow_storage_volume_dir }}:{{ nifi_registry_flow_storage_dir }}:rw"
+    published_ports:
+      - "{{ nifi_registry_port }}:{{ nifi_registry_port }}"
+    env:
+      NIFI_REGISTRY_HOME: "{{ nifi_registry_home }}"
